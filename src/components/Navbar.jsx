@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { useState } from "react";
 
 export default function MyNavbar() {
@@ -8,7 +9,8 @@ export default function MyNavbar() {
     "relative text-sm text-zinc-300 transition duration-300 hover:text-white";
 
   return (
-    <nav className="w-full bg-[#121212]/90 backdrop-blur-md border-b border-zinc-800 text-white sticky top-0 z-50">
+    <nav className="w-full bg-[#121212]/90 backdrop-blur-md border-b
+     border-zinc-800 text-white sticky top-0 z-50">
       <div className="w-full px-4 sm:px-6 lg:px-10">
 
         {/* TOP BAR */}
@@ -16,22 +18,8 @@ export default function MyNavbar() {
 
           {/* LOGO */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center shadow-lg">
-              <svg
-                className="w-5 h-5 text-white"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-              >
-                <polyline points="16 18 22 12 16 6" />
-                <polyline points="8 6 2 12 8 18" />
-              </svg>
-            </div>
+           <Image src={'/logo.png'} width={80} height={80} alt="logo" />
 
-            <span className="font-bold text-xl tracking-tight">
-              Job HireLoop
-            </span>
           </div>
 
           {/* DESKTOP MENU */}

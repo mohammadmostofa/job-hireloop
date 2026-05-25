@@ -1,10 +1,12 @@
-import BannerPage from "./Banner/page";
+import BannerPage from "@/components/Banner";
 
 
 export default function Home() {
   return (
     <div>
+        
         <BannerPage/>
+
     </div>
   );
 }
