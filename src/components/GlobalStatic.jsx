@@ -1,116 +1,125 @@
-// "use client";
+"use client";
 
-// import React from "react";
-// import {
-//   FiBriefcase,
-//   FiBarChart2,
-//   FiSearch,
-//   FiStar,
-// } from "react-icons/fi";
+import React from "react";
+import { motion } from "motion/react";
+import {
+  FiBriefcase,
+  FiBarChart2,
+  FiSearch,
+  FiStar,
+} from "react-icons/fi";
 
-// export default function GlobeStats() {
-//   const stats = [
-//     {
-//       id: 1,
-//       icon: <FiBriefcase className="text-xl sm:text-2xl text-neutral-300" />,
-//       value: "50K",
-//       label: "Active Jobs",
-//     },
-//     {
-//       id: 2,
-//       icon: <FiBarChart2 className="text-xl sm:text-2xl text-neutral-300" />,
-//       value: "12K",
-//       label: "Companies",
-//     },
-//     {
-//       id: 3,
-//       icon: <FiSearch className="text-xl sm:text-2xl text-neutral-300" />,
-//       value: "2M",
-//       label: "Job Seekers",
-//     },
-//     {
-//       id: 4,
-//       icon: <FiStar className="text-xl sm:text-2xl text-neutral-300" />,
-//       value: "97%",
-//       label: "Satisfaction Rate",
-//     },
-//   ];
+export default function GlobeStats() {
+  const stats = [
+    {
+      id: 1,
+      icon: <FiBriefcase className="text-xl text-zinc-400 group-hover:text-white transition-colors" />,
+      value: "50K",
+      label: "Active Jobs",
+    },
+    {
+      id: 2,
+      icon: <FiBarChart2 className="text-xl text-zinc-400 group-hover:text-white transition-colors" />,
+      value: "12K",
+      label: "Companies",
+    },
+    {
+      id: 3,
+      icon: <FiSearch className="text-xl text-zinc-400 group-hover:text-white transition-colors" />,
+      value: "2M",
+      label: "Job Seekers",
+    },
+    {
+      id: 4,
+      icon: <FiStar className="text-xl text-zinc-400 group-hover:text-white transition-colors" />,
+      value: "97%",
+      label: "Satisfaction Rate",
+    },
+  ];
 
-//   return (
-//     <section className="relative w-full min-h-[750px] sm:min-h-[850px]  bg-indigo-600/10 
-//      text-white overflow-hidden flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+  return (
+    <section className="relative w-full min-h-screen bg-black text-white overflow-hidden flex flex-col items-center justify-between px-4 sm:px-6 lg:px-8 pb-16 pt-32">
+      
+      {/* ================= BACKGROUND GLOBE & NEON GLOW ================= */}
+      {/* w-full h-full দিয়ে পুরো সেকশন জুড়ে ব্যাকগ্রাউন্ড কভার করা হয়েছে */}
+      <div className="absolute inset-0 flex justify-center items-center pointer-events-none select-none z-0 w-full h-full">
+        <div className="relative w-full h-full">
+          {/* গ্লোবের পেছনের গ্লোয়িং নিওন আভা */}
+          <div className="absolute inset-0 bg-gradient-to-b from-blue-600/20 via-indigo-500/10 to-transparent blur-[140px]" />
+          
+          {/* মেইন গ্লোব ইমেজ (bg-cover এবং কাস্টম মাস্কিং) */}
+          <div 
+            className="absolute inset-0 bg-no-repeat bg-center bg-cover opacity-75"
+            style={{
+              backgroundImage: "url('/globe.png')",
+              // চারপাশের এজ হাইড করার জন্য আরও বড় রেডিয়াসের রেডিয়াল মাস্ক এবং লিনিয়ার মাস্ক মিক্স করা হয়েছে
+              maskImage: "radial-gradient(circle at center, black 20%, transparent 75%), linear-gradient(to bottom, transparent 0%, black 15%, black 80%, transparent 100%), linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)",
+              WebkitMaskImage: "radial-gradient(circle at center, black 20%, transparent 75%), linear-gradient(to bottom, transparent 0%, black 15%, black 80%, transparent 100%), linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)",
+              maskComposite: "intersect",
+              WebkitMaskComposite: "source-in"
+            }}
+          />
+        </div>
+      </div>
 
-//       {/* ================= BACKGROUND GLOBE ================= */}
-//       <div
-//         className="absolute inset-0 z-0 bg-no-repeat bg-center bg-cover"
-//         style={{
-//           backgroundImage: "url('/globe.png')",
-//           backgroundPosition: "center center",
-//           opacity: 1,
-//         }}
-//       />
+      {/* ব্যাকগ্রাউন্ড নিচের ডার্ক ওভারলে */}
+      <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black via-black/60 to-transparent z-10 pointer-events-none" />
 
-//       {/* ================= CLEAN GLOW ================= */}
-//       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] sm:w-[700px] lg:w-[950px] h-[350px] sm:h-[500px]
-//        bg-indigo-500/10 blur-[160px] rounded-full pointer-events-none z-0" />
+      {/* ================= CONTENT WRAPPER ================= */}
+      <div className="relative z-20 flex flex-col items-center justify-between w-full max-w-6xl mx-auto h-full flex-1">
 
-//       {/* ================= OVERLAY ================= */}
-//       <div className="absolute inset-0 bg-black/40 z-10" />
+        {/* ================= HEADER (GLOBE CENTERED) ================= */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="text-center max-w-2xl mx-auto mt-auto mb-16 sm:mb-24 px-4"
+        >
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-normal tracking-tight text-zinc-300 leading-snug">
+            Assisting over{" "}
+            <span className="font-semibold text-white">
+              15,000 job seekers
+            </span>{" "}
+            <br />
+            find their dream positions.
+          </h2>
+        </motion.div>
 
-//       {/* ================= CONTENT WRAPPER ================= */}
-//       <div className="relative z-20 flex flex-col items-center justify-center w-full">
+        {/* ================= STATS GRID ================= */}
+        <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mt-auto">
+          {stats.map((stat, i) => (
+            <motion.div
+              key={stat.id}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: i * 0.1, ease: "easeOut" }}
+              whileHover={{ 
+                y: -5,
+                backgroundColor: "#111114",
+                borderColor: "#222226"
+              }}
+              className="bg-[#0c0c0e]/90 backdrop-blur-md border border-[#141416] rounded-2xl p-7 flex flex-col justify-between min-h-[190px] transition-all duration-300 group cursor-pointer shadow-2xl"
+            >
+              {/* ICON */}
+              <div className="w-fit p-1">
+                {stat.icon}
+              </div>
 
-//         {/* ================= HEADING ================= */}
-//         <div className="text-center max-w-4xl mx-auto px-4 mb-10 sm:mb-14 lg:mb-16">
+              {/* TEXT */}
+              <div className="mt-8">
+                <h3 className="text-4xl sm:text-5xl font-semibold text-white tracking-tight">
+                  {stat.value}
+                </h3>
+                <p className="mt-2 text-xs sm:text-sm text-zinc-500 font-normal tracking-wide">
+                  {stat.label}
+                </p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
 
-//   {/* ================= HEADING ================= */}
-//   {/* ১. text-indigo-400 এর জায়গায় text-white এবং block সরিয়ে স্বাভাবিক ইনলাইন ফ্লো আনা হয়েছে */}
-//   <h2 className="text-2xl sm:text-4xl md:text-5xl font-medium tracking-tight text-neutral-200 leading-snug max-w-3xl mx-auto">
-//     Assisting over{" "}
-//     <span className="font-semibold text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.15)]">
-//       15,000 job seekers
-//     </span>{" "}
-//     find their dream positions.
-//   </h2>
-
-//   {/* ================= SUBTITLE ================= */}
-//   {/* ২. সাবটাইটেলটির ফন্ট সাইজ এবং উইডথ একটু কমানো হয়েছে যেন এটি হেডিংকে ওভারপাওয়ার না করে */}
-//   <p className="mt-4 sm:mt-6 text-xs sm:text-sm md:text-base text-neutral-400 max-w-xl mx-auto leading-relaxed">
-//     Helping professionals connect with leading companies and unlock
-//     career opportunities through a seamless modern hiring experience.
-//   </p>
-
-// </div>
-
-//         {/* ================= STATS GRID ================= */}
-//         <div className="w-full max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-6 sm:mt-10">
-
-//           {stats.map((stat) => (
-//             <div
-//               key={stat.id}
-//               className="  bg-white/10  backdrop-blur-2xl  border border-white/10  rounded-3xl  p-6  hover:bg-white/15  hover:border-white/20  transition-all duration-300  shadow-[0_8px_32px_rgba(0,0,0,0.35)]  flex flex-col justify-between  min-h-[170px] ">
-
-//               {/* ICON */}
-//               <div className="w-fit p-3 rounded-2xl bg-white/10 border border-white/10">
-//                 {stat.icon}
-//               </div>
-
-//               {/* TEXT */}
-//               <div className="mt-6">
-//                 <h3 className="text-4xl font-bold text-white">
-//                   {stat.value}
-//                 </h3>
-
-//                 <p className="mt-2 text-sm text-neutral-300">
-//                   {stat.label}
-//                 </p>
-//               </div>
-
-//             </div>
-//           ))}
-
-//         </div>
-//       </div>
-//     </section>
-//   );
-// }
+      </div>
+    </section>
+  );
+}
