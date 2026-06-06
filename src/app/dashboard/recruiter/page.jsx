@@ -2,8 +2,8 @@
 import React from 'react';
 import { useSession } from '@/lib/auth-client';
 import { FileText, Users, Zap, CheckCircle2 } from "lucide-react";
-import RecentApplications from '@/components/dashboard/RecentApplications';
 import TopCompanies from '@/components/dashboard/TopCompanies';
+import RecentJobsDashboard from '@/components/dashboard/RecentApplications';
 
 // প্রফেশনাল স্ট্যাটাস কার্ড
 const StatCard = ({ icon, title, value }) => (
@@ -59,7 +59,7 @@ const RecruiterDashboardHomePage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full max-w-[1400px] mx-auto items-start px-2">
         {/* টেবিল পার্ট - ১২ ভাগের ৮ ভাগ নেবে */}
         <div className="w-full lg:col-span-8">
-          <RecentApplications />
+          <RecentJobsDashboard/>
         </div>
         
         {/* কোম্পানি পার্ট - ১২ ভাগের ৪ ভাগ নেবে */}
