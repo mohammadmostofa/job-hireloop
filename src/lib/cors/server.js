@@ -27,7 +27,37 @@ export const serverMutation = async (path, data) => {
   }
 };
 
-// কোম্পানি তৈরি করার সুনির্দিষ্ট অ্যাকশন
-export const CreateCompany = async (newCompanyData) => {
-  return await serverMutation('/api/companies', newCompanyData);
+
+
+
+
+// get dat from backend 
+export const serverFetch = async (path, params = {}) => {
+  try {
+    const sanitizedPath = path.startsWith('/') ? path : `/${path}`;
+    const sanitizedBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+
+    // URL এর সাথে query params যোগ করা
+    const url = new URL(`${sanitizedBaseUrl}${sanitizedPath}`);
+    Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+
+    const res = await fetch(url.toString(), {
+      method: 'GET', // মেথড GET
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error(`Server responded with status: ${res.status}`);
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("Error in serverFetchGet:", error);
+    return { success: false, error: error.message };
+  }
 };
+
+
+
