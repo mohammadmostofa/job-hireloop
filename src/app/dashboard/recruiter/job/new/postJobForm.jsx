@@ -1,43 +1,46 @@
 "use client";
-
-import React, { useState } from "react";
-import { Form, Fieldset, TextField, Button, Select, Label, ListBox, toast } from "@heroui/react";
+import React, { useState, useEffect } from "react";
+import { toast } from "react-hot-toast";
+import { Form, Fieldset, TextField, Button, Select, Label, ListBox } from "@heroui/react";
 import { Briefcase, Layers, Clock, CircleDollarSign, Globe, MapPin, Calendar, Lightbulb, ListTodo, Heart, Send, X } from "lucide-react";
 import { createJob } from "@/lib/action/jobs";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 
-export default function PostJobForm({company}) {
-  console.log(company,"coooo")
-  const currentCompany = {
-    id: "comp_98745",
-    name: "Acme Corp (Auto-filled)",
-    isApproved: true,
-  };
-
+export default function PostJobForm({ company }) {
+  const router = useRouter();
   const [isRemote, setIsRemote] = useState(false);
+  const [locationText, setLocationText] = useState(""); 
   const [pending, setPending] = useState(false);
   const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    if (isRemote) {
+      setLocationText("Remote");
+    } else {
+      setLocationText("");
+    }
+  }, [isRemote]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrors({});
     
     const formData = new FormData(e.currentTarget);
-    const remoteBoolean = formData.get("isRemote") === "true";
+    const remoteBoolean = isRemote; 
 
     const newErrors = {};
     const jobTitle = formData.get("jobTitle");
     const deadline = formData.get("deadline");
     const responsibilities = formData.get("responsibilities");
     const requirements = formData.get("requirements");
-    const locationVal = formData.get("location");
+    const locationVal = locationText; 
 
     if (!jobTitle) newErrors.jobTitle = "Job title is required.";
     if (!deadline) newErrors.deadline = "Application deadline is required.";
     if (!responsibilities) newErrors.responsibilities = "Core responsibilities are required.";
     if (!requirements) newErrors.requirements = "Candidate requirements are required.";
     
-    if (!remoteBoolean && !locationVal) {
+    if (!remoteBoolean && !locationVal.trim()) {
       newErrors.location = "Location is required for non-remote roles.";
     }
 
@@ -47,6 +50,7 @@ export default function PostJobForm({company}) {
     }
 
     setPending(true);
+    const targetCompany = Array.isArray(company) ? company[0] : company;
 
     const jobPayload = {
       title: jobTitle,
@@ -58,36 +62,42 @@ export default function PostJobForm({company}) {
         currency: formData.get("currency"),
       },
       locationType: remoteBoolean ? "Remote" : "On-site",
-      location: remoteBoolean ? "N/A" : locationVal,
+      location: remoteBoolean ? "Remote" : locationVal, 
       deadline: deadline,
       description: {
         responsibilities: responsibilities,
         requirements: requirements,
         benefits: formData.get("benefits") || "",
       },
-      companyId: currentCompany.id,
-      companyName: currentCompany.name,
+      companyId: targetCompany?._id || targetCompany?.id || null,
+      companyName: targetCompany?.name || "Unknown Company",
+      companyLogo: targetCompany?.logoUrl || "",
       status: "active",
       isPubliclyVisible: true,
     };
 
-    // console.log("Submitting Valid Job Payload:", jobPayload);
-    //call api to action file
-
-    const res =  await createJob(jobPayload) 
-    if(res.insertedId){
-      toast.success('Job posted successfully!')
-      e.target.reset();
-      setIsRemote(false);
-      redirect('/dashboard/recruiter')
-    }
-    
-
-    setTimeout(() => {
-      alert("Job posted successfully!");
+    try {
+      const res = await createJob(jobPayload);
+      
+      if (res && res.insertedId) {
+        toast.success('Job posted successfully!');
+        e.target.reset();
+        setIsRemote(false);
+        setLocationText("");
+        router.refresh(); 
+        router.push('/dashboard/recruiter');
+      } else {
+        toast.error('Failed to post job. Please try again.');
+        setPending(false);
+      }
+    } catch (error) {
+      console.error("Error creating job:", error);
+      toast.error('Something went wrong.');
       setPending(false);
-    }, 1000);
+    }
   };
+
+  const targetCompany = Array.isArray(company) ? company[0] : company;
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-4">
@@ -99,11 +109,10 @@ export default function PostJobForm({company}) {
             <h1 className="text-xl font-semibold tracking-tight text-zinc-100">Post a New Job</h1>
             <p className="text-xs text-zinc-400 mt-1">Fill out the details below to publish your open position.</p>
             
-            {/* ইমেজ অনুযায়ী "Posting as: Acme Corp (Auto-filled) Approved" ব্যাজ সেকশন */}
             <div className="flex items-center gap-2 mt-4 text-xs text-zinc-400">
               <Briefcase className="w-3.5 h-3.5 text-zinc-500" />
-              <span>Posting as: <span className="text-zinc-200 font-medium">{currentCompany.name}</span></span>
-              {currentCompany.isApproved && (
+              <span>Posting as: <span className="text-zinc-200 font-medium">{targetCompany?.name || "Unknown Company"}</span></span>
+              {targetCompany?.isApproved && (
                 <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-950/30 px-2 py-0.5 rounded border border-emerald-800/30">
                   Approved
                 </span>
@@ -242,38 +251,45 @@ export default function PostJobForm({company}) {
                     aria-checked={isRemote}
                     aria-labelledby="remote-label"
                     onClick={() => setIsRemote(!isRemote)}
-                    className={`relative inline-flex h-4.5 w-8 items-center rounded-full transition-colors ${
+                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 focus:outline-none ${
                       isRemote ? "bg-white" : "bg-zinc-800"
                     }`}
                   >
-                    <span className={`inline-block h-3 w-3 transform rounded-full transition-transform ${
-                      isRemote ? "translate-x-4 bg-black" : "translate-x-1 bg-zinc-400"
+                    <span className={`inline-block h-3.5 w-3.5 transform rounded-full transition-transform duration-200 ${
+                      isRemote ? "translate-x-4.5 bg-black" : "translate-x-1 bg-zinc-400"
                     }`} />
                   </button>
                 </div>
               </div>
 
-              {!isRemote ? (
-                <TextField className="w-full flex flex-col pt-1">
-                  <div className="relative flex items-center w-full">
-                    <span className="absolute left-3 text-zinc-500" aria-hidden="true">
-                      <Globe className="w-4 h-4" />
-                    </span>
-                    <input 
-                      name="location" 
-                      aria-required="true"
-                      aria-label="Job Location"
-                      aria-invalid={errors.location ? "true" : "false"}
-                      aria-describedby={errors.location ? "location-error" : undefined}
-                      className={`w-full h-10 pl-9 pr-3 text-sm rounded-lg bg-zinc-900/60 border ${errors.location ? 'border-red-500/80 bg-red-950/10' : 'border-zinc-800'} text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-zinc-700 transition`} 
-                      placeholder="Austin, TX" 
-                    />
-                  </div>
-                  {errors.location && <p id="location-error" role="alert" className="text-[11px] text-red-400 mt-1">{errors.location}</p>}
-                </TextField>
-              ) : (
-                <p className="text-[11px] text-zinc-500 italic pt-1" role="status">This is a fully remote position (accessible worldwide).</p>
-              )}
+              <TextField className="w-full flex flex-col pt-1">
+                <div className="relative flex items-center w-full">
+                  <span className="absolute left-3 text-zinc-500" aria-hidden="true">
+                    <Globe className="w-4 h-4" />
+                  </span>
+                  <input 
+                    name="location" 
+                    id="location"
+                    type="text"
+                    aria-required={!isRemote}
+                    aria-label="Job Location"
+                    aria-invalid={errors.location ? "true" : "false"}
+                    aria-describedby={errors.location ? "location-error" : undefined}
+                    value={locationText} 
+                    onChange={(e) => setLocationText(e.target.value)} 
+                    disabled={isRemote}
+                    className={`w-full h-10 pl-9 pr-3 text-sm rounded-lg bg-zinc-900/60 border ${
+                      errors.location && !isRemote ? 'border-red-500/80 bg-red-950/10' : 'border-zinc-800'
+                    } text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-zinc-700 transition disabled:opacity-70 disabled:text-zinc-400 disabled:cursor-not-allowed`} 
+                    placeholder="Austin, TX" 
+                  />
+                </div>
+                {errors.location && !isRemote && (
+                  <p id="location-error" role="alert" className="text-[11px] text-red-400 mt-1">
+                    {errors.location}
+                  </p>
+                )}
+              </TextField>
             </div>
           </Fieldset>
 
@@ -326,7 +342,12 @@ export default function PostJobForm({company}) {
           {/* ফুটার একশন */}
           <div className="pt-4 border-t border-zinc-800/80 flex items-center justify-end gap-3">
             <Button type="button" className="px-5 h-10 text-xs font-medium text-zinc-400 hover:text-zinc-200 border border-zinc-800 bg-zinc-900/20 rounded-lg transition">Cancel</Button>
-            <Button type="submit" isDisabled={pending || !currentCompany.isApproved} className="px-5 h-10 text-xs font-semibold bg-white hover:bg-zinc-200 text-black rounded-lg transition-all shadow-md flex items-center gap-1.5">
+            
+            <Button 
+              type="submit"  
+              disabled={pending}
+              className="px-5 h-10 text-xs font-semibold bg-white hover:bg-zinc-200 text-black rounded-lg transition-all shadow-md flex items-center gap-1.5 disabled:bg-zinc-800 disabled:text-zinc-500"
+            >
               <Send className="w-3.5 h-3.5" aria-hidden="true" />
               {pending ? "Publishing..." : "Publish Job"}
             </Button>
