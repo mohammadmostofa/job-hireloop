@@ -29,8 +29,6 @@ export const serverMutation = async (path, data) => {
 
 
 
-
-
 // get dat from backend 
 export const serverFetch = async (path, params = {}) => {
   try {

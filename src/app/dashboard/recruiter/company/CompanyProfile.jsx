@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { 
   Building2, 
   Layers, 
@@ -17,24 +17,15 @@ import Image from "next/image";
 import { CreateCompany } from "@/lib/action/companies/company";
 
 export default function CompanyProfile({ recruiter, recruiterCompany }) {
-  // সেফটি চেক: ডাটা যদি অ্যারে আকারে আসে [ {} ] তবে প্রথম অবজেক্টটি নেওয়া হবে
-  const safeCompany = Array.isArray(recruiterCompany) ? recruiterCompany[0] : recruiterCompany;
-
+  // নতুন ইউজারের ক্ষেত্রে recruiterCompany যদি খালি {} বা null আসে, তবে এটি null সেট করবে
   const [currentCompany, setCurrentCompany] = useState(
-    safeCompany && safeCompany.name ? safeCompany : null
+    recruiterCompany && recruiterCompany.name ? recruiterCompany : null
   );
   const [isEditing, setIsEditing] = useState(false);
   const [logoPreview, setLogoPreview] = useState("");
   const [selectedFile, setSelectedFile] = useState(null); 
   const [pending, setPending] = useState(false);
   const [errors, setErrors] = useState({});
-
-  // প্যারেন্ট থেকে আসা প্রোম্পস আপডেট হলে স্টেটও যেন আপডেট হয়
-  useEffect(() => {
-    if (safeCompany && safeCompany.name) {
-      setCurrentCompany(safeCompany);
-    }
-  }, [recruiterCompany]);
 
   const getStatusStyle = (status) => {
     if (status === "Approved") return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
@@ -109,17 +100,15 @@ export default function CompanyProfile({ recruiter, recruiterCompany }) {
       employeeCount: formData.get("employeeCount"),
       description: formData.get("description"),
       logoUrl: finalLogoUrl, 
-      status: currentCompany?.status || "Pending",
-      recruiterId: recruiter?.id || recruiter?._id,
+      status: currentCompany?.status || "Pending" ,
+      recruiterId: recruiter?.id,
     };
 
     try {
       const dbData = await CreateCompany(companyData);
 
       if (dbData && !dbData.error) {
-        // ফ্রন্টএন্ড স্টেটে আইডি রিড করার জন্য _id এবং id দুইটাই সেট করে দেওয়া হলো
-        const generatedId = dbData.insertedId || dbData.id;
-        setCurrentCompany({ ...companyData, _id: generatedId, id: generatedId }); 
+        setCurrentCompany({ ...companyData, _id: dbData.insertedId }); 
         setIsEditing(false);
         setSelectedFile(null); 
         alert("Company Registered Successfully!");
@@ -138,7 +127,7 @@ export default function CompanyProfile({ recruiter, recruiterCompany }) {
   return (
     <div className="w-full max-w-xl mx-auto p-4 select-none">
       
-      {/* ১. নো কোম্পানি রেজিস্টার্ড ভিউ */}
+      {/* ১. নো কোম্পানি রেজিস্টার্ড ভিউ (নতুন ইউজাররা প্রথমে এটি দেখবে) */}
       {!currentCompany && !isEditing && (
         <div className="border border-dashed border-zinc-800 rounded-xl p-8 text-center bg-zinc-950/40 backdrop-blur-md flex flex-col items-center justify-center space-y-4">
           <div className="p-4 bg-zinc-900 rounded-full text-zinc-500 border border-zinc-800 shadow-md">
@@ -160,7 +149,7 @@ export default function CompanyProfile({ recruiter, recruiterCompany }) {
         </div>
       )}
 
-      {/* ২. কোম্পানি প্রোফাইল ভিউ (যা আপনার স্ক্রিনশটে দেখাচ্ছে) */}
+      {/* ২. কোম্পানি প্রোফাইল ভিউ (রেজিস্ট্রেশন কমপ্লিট হওয়ার পর দেখাবে) */}
       {currentCompany && !isEditing && (
         <div className="border border-zinc-800 rounded-xl bg-zinc-900/40 backdrop-blur-md p-6 space-y-5 animate-fade-in">
           <div className="flex items-start justify-between gap-4 pb-4 border-b border-zinc-800/60">
@@ -179,7 +168,7 @@ export default function CompanyProfile({ recruiter, recruiterCompany }) {
                 <div className="flex items-center gap-2 flex-wrap">
                   <h2 className="text-lg font-bold text-zinc-100 tracking-tight">{currentCompany.name}</h2>
                   <span className={`px-2 py-0.5 text-[10px] font-medium rounded-full border ${getStatusStyle(currentCompany.status)}`}>
-                    {currentCompany.status || "Pending"}
+                    {currentCompany.status}
                   </span>
                 </div>
                 <p className="text-xs text-zinc-400 inline-flex items-center gap-1 mt-0.5">
@@ -204,21 +193,21 @@ export default function CompanyProfile({ recruiter, recruiterCompany }) {
               <Layers className="w-4 h-4 text-zinc-500" />
               <div>
                 <p className="text-[10px] text-zinc-500 font-medium uppercase">Industry</p>
-                <p className="text-xs text-zinc-300 mt-0.5">{currentCompany.industry || "Not Specified"}</p>
+                <p className="text-xs text-zinc-300 mt-0.5">{currentCompany.industry}</p>
               </div>
             </div>
             <div className="p-3 rounded-lg bg-zinc-900/20 border border-zinc-800/60 flex items-center gap-2.5">
               <MapPin className="w-4 h-4 text-zinc-500" />
               <div>
                 <p className="text-[10px] text-zinc-500 font-medium uppercase">Location</p>
-                <p className="text-xs text-zinc-300 mt-0.5">{currentCompany.location || "Not Specified"}</p>
+                <p className="text-xs text-zinc-300 mt-0.5">{currentCompany.location}</p>
               </div>
             </div>
             <div className="p-3 rounded-lg bg-zinc-900/20 border border-zinc-800/60 flex items-center gap-2.5 col-span-2">
-              <Building2 className="w-4 h-4 text-zinc-500" />
+              <Users className="w-4 h-4 text-zinc-500" />
               <div>
                 <p className="text-[10px] text-zinc-500 font-medium uppercase">Employee Range</p>
-                <p className="text-xs text-zinc-300 mt-0.5">{currentCompany.employeeCount || "Not Specified"}</p>
+                <p className="text-xs text-zinc-300 mt-0.5">{currentCompany.employeeCount}</p>
               </div>
             </div>
           </div>
@@ -228,7 +217,7 @@ export default function CompanyProfile({ recruiter, recruiterCompany }) {
               <FileText className="w-3.5 h-3.5 text-zinc-500" /> Description
             </p>
             <p className="text-xs text-zinc-300 bg-zinc-900/10 border border-zinc-800/40 p-3 rounded-lg leading-relaxed">
-              {currentCompany.description || "No description provided."}
+              {currentCompany.description}
             </p>
           </div>
         </div>
@@ -273,12 +262,18 @@ export default function CompanyProfile({ recruiter, recruiterCompany }) {
                 <select
                   name="industry"
                   defaultValue={currentCompany?.industry || "Technology"}
-                  className="w-full h-10 px-3 text-sm rounded-lg bg-zinc-900/60 border border-zinc-800 text-zinc-200 focus:outline-none focus:border-zinc-700 transition"
+                  className="w-full h-10 px-3 text-sm rounded-lg bg-zinc-900/80 border border-zinc-800 text-zinc-200 focus:outline-none focus:border-zinc-700 transition"
                 >
                   <option value="Technology">Technology</option>
                   <option value="Design & Creative">Design & Creative</option>
                   <option value="Marketing">Marketing</option>
-                </select>
+                  <option value="Travel & Hospitality">Travel & Hospitality</option>
+                  <option value="E-commerce">E-commerce</option>
+                  <option value="Entertainment">Entertainment</option>
+                  <option value="Social Media">Social Media</option>
+                  <option value="Automotive">Automotive</option>
+                  <option value="Music & Streaming">Music & Streaming</option>
+                  <option value="Transport">Transport</option>                </select>
               </div>
             </div>
 
